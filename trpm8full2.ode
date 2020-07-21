@@ -1,0 +1,47 @@
+# initialise the variables. v is the deviation from rest.
+v(0)=-60.0
+n(0)=0.3
+m(0)=0.05
+h(0)=0.6
+#
+# set the remaining parameters
+
+
+param gm8=.15
+param TEMP=30
+
+param gna=120
+param gl=.3
+param vm8=0
+param gk=36
+
+
+param Iapp=0
+param  cm=1
+param vna=50   vk=-77  vl=-54.3870
+
+param delH=-156000 delS=-550 zm8=.87
+param F=96485 R=8.315
+param Vr=-65
+#
+# define the functions
+alpha_m(v)=0.1*(25-v+Vr)/(exp((25-v+Vr)/10)-1)
+beta_m(v)=4*exp((-v+Vr)/18)
+alpha_n(v)=0.01*(10-v+Vr)/(exp((10-v+Vr)/10)-1)
+beta_n(v)=0.125*exp((-v+Vr)/80)
+alpha_h(v)=0.07*exp((-v+Vr)/20)
+beta_h(v)=1/(exp((30-v+Vr)/10)+1)
+phi=3^((TEMP-6.3)/10)
+am8(v)=1/(1+exp((delH-(TEMP+273)*delS-(zm8*F*v)/1000)/(R*(TEMP+273))))
+#
+# define the ODEs
+v'=(1/cm)*(-gk*(n^4)*(v-vk) - gna*(m^3)*h*(v-vna) - gl*(v-vl)-gm8*am8(v)*(v-vm8) + Iapp)
+n'=phi*(alpha_n(v)*(1-n) - beta_n(v)*n)
+m'=phi*(alpha_m(v)*(1-m) - beta_m(v)*m)
+h'=phi*(alpha_h(v)*(1-h) - beta_h(v)*h)
+#
+@ total=200, xp=t, yp=v, dt=0.1, xlo=0, xhi=200, ylo=-90, yhi=90,  
+@ meth=cvode, bound=1000, dtmin=.00001
+@ autovar=Iapp,ntst=50,nmax=2000,npr=2000,dsmin=0.001,dsmax=1,ds=0.01
+@ parmin=-50,parmax=500,autoxmin=0,autoxmax=40,autoymin=-80,autoymax=400
+done
